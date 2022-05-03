@@ -1,0 +1,124 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+Listing 
+{% endblock %}
+
+{% block body %}
+<div class="form-group">
+    by: <b><i>{{listing.user}}</i></b>
+</div>
+
+<!--Adding/Deleting from Watchlist-->
+{% if user.is_authenticated %}
+<div style="float: right; padding-right: 50px">
+    {% if not in_watchlist %}
+
+        <strong style="font-size:18px">Add to Watchlist</strong>
+
+        <form action="{% url 'watchlist' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="listing_id_add" value={{listing.id}}>
+            <input class="btn btn-primary" name="add" type="submit" value="Add">
+        </form>
+
+    {% else %}
+
+        <strong style="font-size:18px">Remove from Watchlist</strong>
+
+        <form action="{% url 'watchlist' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="listing_id_delete" value={{listing.id}}>
+            <input class="btn btn-danger" name="delete" type="submit" value="Remove">
+        </form>
+    {% endif %}
+</div>
+{% endif %}
+
+<!--Close auction-->
+{% if user == listing.user %}
+    <div style="float: right; padding-right: 50px">
+        <strong style="font-size:18px">Close Listing</strong>
+
+        <form action="{% url 'index' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="listing_id_close" value={{listing.id}}>
+            <input class="btn btn-danger" name="close" type="submit" value="Close">
+        </form>
+    </div>
+    <br>
+{% endif %}
+
+<!--Listing info-->
+ <div class="form-group">
+     <b style="font-size:30px"><i><u>{{listing.title}}</u></i></b>
+ </div>
+
+ <div>
+    {% if message %}
+        <strong>*{{message}}*</strong>
+    {% endif %}
+ </div>
+ <div class="form-group">
+    <img src={{listing.photo_url}} width="600px" height="600px">
+</div>
+
+<div class="form-group">
+    <strong style="font-size:20px"><i>What is this item?</i></strong> <br>
+        {{listing.description}}
+</div>
+<br><br>
+
+<!--Bidding-->
+<div class="form-group">
+
+    {% if not user.is_authenticated %}
+        <i><b>*Login to place your bid!*</b></i>
+    {% else %}
+        <b style="font-size:20px">Place your bid(Up to 2 decimal places)</b>
+    {% endif %}
+    <br>
+    
+    Highest Bid: 
+    <b><i>
+        {% if is_none %} 
+            ${{listing.bid}} 
+        {% else %}
+            ${{max_bid}}
+        {% endif %}
+    </i></b>
+    <br>
+    <form action="{% url 'listing' listing.id %}" method="post">
+        {% csrf_token %}
+        {{bid_form}}
+        <input class="btn btn-primary" type="submit" value="Submit">
+    </form>
+</div>
+
+<!--Commenting-->
+<div class="form-group">
+
+    {% if not user.is_authenticated %}
+        <i><b>*Login to comment!*</b></i>
+    {% else %}
+        <b style="font-size:20px">Comments</b>
+    {% endif %}
+    
+    <br>
+    <form action="{% url 'listing' listing.id %}" method="post">
+        {% csrf_token %}
+        {{comment_form}}
+        <input class="btn btn-primary" type="submit" value="Submit">
+    </form>
+</div>
+
+<!--Other comments-->
+<div class="form-group">
+    <ul>
+        {% for comment in comments%}
+            <strong>{{comment.user}}</strong> <br>
+            <li>{{comment.comment}}</li> <br>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

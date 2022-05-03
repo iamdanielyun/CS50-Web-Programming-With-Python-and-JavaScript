@@ -1,0 +1,67 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+Watchlist
+{% endblock %}
+
+{% block body %}
+
+<h2><b>Watchlist</b></h2>
+<br>
+    <ul>
+        {% for listing, max_bid in max_bids.items %}
+        
+            <li>
+                <div>
+                    By: <b><i><strong>{{listing.user}}</strong></i></b>
+                </div>
+
+                <div>
+                    <a href="{% url 'listing' listing.id %}"><b><strong>{{listing.title}}</strong></b></a>
+                </div>
+
+                <div>
+                    Category: 
+                    {% if listing.category == '' %} None {% endif %}
+
+                    <b>{{listing.category}}</b>
+                </div>
+
+                <div>
+                    <img src={{listing.photo_url}} 
+                    alt="This is the {{listing.title}}"
+                    width="400px" height="400px">
+                </div>
+                
+                
+                <div>
+                    <strong>Description</strong> <br>
+                    {{listing.description}}
+                </div>
+                <br>
+                <div>
+                    <b>Current Price:</b>
+
+                    {% if max_bid == "None" %}
+                        <b><i>${{listing.bid}}</i></b>
+                    {% else %}
+                        <b><i>${{max_bid}}</i></b>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <form action="{% url 'watchlist' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="listing_id_delete" value="{{listing.id}}">
+                        <input class="btn btn-danger" name="delete" type="submit" value="Delete">
+                    </form>
+                </div>
+                <br>
+            </li>
+
+        {% empty %}
+            <h3><b>No items yet</b></h3>
+
+        {% endfor %}
+    </ul>
+{% endblock %}
